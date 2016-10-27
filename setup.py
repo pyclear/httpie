@@ -35,9 +35,10 @@ tests_require = [
 
 
 install_requires = [
-    'requests>=2.3.0',
-    'Pygments>=1.5'
+    'requests>=2.11.0',
+    'Pygments>=2.1.3'
 ]
+
 
 # Conditional dependencies:
 
@@ -56,7 +57,7 @@ if 'bdist_wheel' not in sys.argv:
 
 # bdist_wheel
 extras_require = {
-    # http://wheel.readthedocs.org/en/latest/#defining-conditional-dependencies
+    # http://wheel.readthedocs.io/en/latest/#defining-conditional-dependencies
     ':python_version == "2.6"'
     ' or python_version == "3.0"'
     ' or python_version == "3.1" ': ['argparse>=1.2.1'],

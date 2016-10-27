@@ -124,7 +124,7 @@ def program(args, env, log_error):
                     output_options=(
                         args.output_options
                         if response is final_response
-                        else args.output_options_others
+                        else args.output_options_history
                     )
                 ),
                 # NOTE: `env.stdout` will in fact be `stderr` with `--download`
@@ -212,7 +212,7 @@ def main(args=sys.argv[1:], env=Environment(), custom_log_error=None):
         env.stderr.write('\n')
         if include_traceback:
             raise
-        exit_status = ExitStatus.ERROR
+        exit_status = ExitStatus.ERROR_CTRL_C
     except SystemExit as e:
         if e.code != ExitStatus.OK:
             env.stderr.write('\n')
@@ -230,7 +230,7 @@ def main(args=sys.argv[1:], env=Environment(), custom_log_error=None):
             env.stderr.write('\n')
             if include_traceback:
                 raise
-            exit_status = ExitStatus.ERROR
+            exit_status = ExitStatus.ERROR_CTRL_C
         except SystemExit as e:
             if e.code != ExitStatus.OK:
                 env.stderr.write('\n')
@@ -243,7 +243,7 @@ def main(args=sys.argv[1:], env=Environment(), custom_log_error=None):
         except requests.TooManyRedirects:
             exit_status = ExitStatus.ERROR_TOO_MANY_REDIRECTS
             log_error('Too many redirects (--max-redirects=%s).',
-                  parsed_args.max_redirects)
+                      parsed_args.max_redirects)
         except Exception as e:
             # TODO: Further distinction between expected and unexpected errors.
             msg = str(e)

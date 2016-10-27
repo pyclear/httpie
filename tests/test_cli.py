@@ -68,10 +68,11 @@ class TestItemParsing:
     def test_valid_items(self):
         items = input.parse_items([
             self.key_value('string=value'),
-            self.key_value('header:value'),
+            self.key_value('Header:value'),
+            self.key_value('Unset-Header:'),
+            self.key_value('Empty-Header;'),
             self.key_value('list:=["a", 1, {}, false]'),
             self.key_value('obj:={"a": "b"}'),
-            self.key_value('eh:'),
             self.key_value('ed='),
             self.key_value('bool:=true'),
             self.key_value('file@' + FILE_PATH_ARG),
@@ -83,7 +84,11 @@ class TestItemParsing:
         # Parsed headers
         # `requests.structures.CaseInsensitiveDict` => `dict`
         headers = dict(items.headers._store.values())
-        assert headers == {'header': 'value', 'eh': ''}
+        assert headers == {
+            'Header': 'value',
+            'Unset-Header': None,
+            'Empty-Header': ''
+        }
 
         # Parsed data
         raw_json_embed = items.data.pop('raw-json-embed')
@@ -103,8 +108,8 @@ class TestItemParsing:
 
         # Parsed file fields
         assert 'file' in items.files
-        assert (items.files['file'][1].read().strip().decode('utf8')
-                == FILE_CONTENT)
+        assert (items.files['file'][1].read().strip().
+                decode('utf8') == FILE_CONTENT)
 
     def test_multiple_file_fields_with_same_field_name(self):
         items = input.parse_items([
@@ -325,8 +330,18 @@ class TestIgnoreStdin:
 
 class TestSchemes:
 
-    def test_custom_scheme(self):
+    def test_invalid_custom_scheme(self):
         # InvalidSchema is expected because HTTPie
         # shouldn't touch a formally valid scheme.
         with pytest.raises(InvalidSchema):
             http('foo+bar-BAZ.123://bah')
+
+    def test_invalid_scheme_via_via_default_scheme(self):
+        # InvalidSchema is expected because HTTPie
+        # shouldn't touch a formally valid scheme.
+        with pytest.raises(InvalidSchema):
+            http('bah', '--default=scheme=foo+bar-BAZ.123')
+
+    def test_default_scheme(self, httpbin_secure):
+        url = '{0}:{1}'.format(httpbin_secure.host, httpbin_secure.port)
+        assert HTTP_OK in http(url, '--default-scheme=https')

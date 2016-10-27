@@ -3,8 +3,16 @@
 
 """
 import sys
-from .core import main
+
+
+def main():
+    try:
+        from .core import main
+        sys.exit(main())
+    except KeyboardInterrupt:
+        from . import ExitStatus
+        sys.exit(ExitStatus.ERROR_CTRL_C)
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()

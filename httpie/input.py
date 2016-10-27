@@ -28,12 +28,11 @@ URL_SCHEME_RE = re.compile(r'^[a-z][a-z0-9.+-]*://', re.IGNORECASE)
 
 HTTP_POST = 'POST'
 HTTP_GET = 'GET'
-HTTP = 'http://'
-HTTPS = 'https://'
 
 
 # Various separators used in args
 SEP_HEADERS = ':'
+SEP_HEADERS_EMPTY = ';'
 SEP_CREDENTIALS = ':'
 SEP_PROXY = ':'
 SEP_DATA = '='
@@ -67,6 +66,7 @@ SEP_GROUP_RAW_JSON_ITEMS = frozenset([
 # Separators allowed in ITEM arguments
 SEP_GROUP_ALL_ITEMS = frozenset([
     SEP_HEADERS,
+    SEP_HEADERS_EMPTY,
     SEP_QUERY,
     SEP_DATA,
     SEP_DATA_RAW_JSON,
@@ -151,7 +151,7 @@ class HTTPieArgumentParser(ArgumentParser):
         if not self.args.ignore_stdin and not env.stdin_isatty:
             self._body_from_file(self.env.stdin)
         if not URL_SCHEME_RE.match(self.args.url):
-            scheme = HTTP
+            scheme = self.args.default_scheme + "://"
 
             # See if we're using curl style shorthand for localhost (:3000/foo)
             shorthand = re.match(r'^:(?!:)(\d*)(/?.*)$', self.args.url)
@@ -309,9 +309,10 @@ class HTTPieArgumentParser(ArgumentParser):
                 self.args.url = self.args.method
                 # Infer the method
                 has_data = (
-                    (not self.args.ignore_stdin and not self.env.stdin_isatty)
-                    or any(item.sep in SEP_GROUP_DATA_ITEMS
-                           for item in self.args.items)
+                    (not self.args.ignore_stdin and
+                     not self.env.stdin_isatty) or
+                    any(item.sep in SEP_GROUP_DATA_ITEMS
+                        for item in self.args.items)
                 )
                 self.args.method = HTTP_POST if has_data else HTTP_GET
 
@@ -380,11 +381,11 @@ class HTTPieArgumentParser(ArgumentParser):
                     else OUTPUT_OPTIONS_DEFAULT_STDOUT_REDIRECTED
                 )
 
-        if self.args.output_options_others is None:
-            self.args.output_options_others = self.args.output_options
+        if self.args.output_options_history is None:
+            self.args.output_options_history = self.args.output_options
 
         check_options(self.args.output_options, '--print')
-        check_options(self.args.output_options_others, '--print-others')
+        check_options(self.args.output_options_history, '--history-print')
 
         if self.args.download and OUT_RESP_BODY in self.args.output_options:
             # Response body is always downloaded with --download and it goes
@@ -439,8 +440,8 @@ class SessionNameValidator(object):
 
     def __call__(self, value):
         # Session name can be a path or just a name.
-        if (os.path.sep not in value
-                and not VALID_SESSION_NAME_PATTERN.search(value)):
+        if (os.path.sep not in value and
+                not VALID_SESSION_NAME_PATTERN.search(value)):
             raise ArgumentError(None, self.error_message)
         return value
 
@@ -655,11 +656,20 @@ def parse_items(items,
     data = []
     files = []
     params = []
-
     for item in items:
         value = item.value
-
         if item.sep == SEP_HEADERS:
+            if value == '':
+                # No value => unset the header
+                value = None
+            target = headers
+        elif item.sep == SEP_HEADERS_EMPTY:
+            if item.value:
+                raise ParseError(
+                    'Invalid item "%s" '
+                    '(to specify an empty header use `Header;`)'
+                    % item.orig
+                )
             target = headers
         elif item.sep == SEP_QUERY:
             target = params

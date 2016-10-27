@@ -9,13 +9,43 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `1.0.0-dev`_ (Unreleased)
 -------------------------
 
+* Added support for ``curses``-less Python installations.
+* Fixed ``REQUEST_ITEM`` arg incorrectly being reported as required.
+* Improved ``CTRL-C`` interrupt handling.
+* Added the standard exit status code ``130`` for keyboard interrupts.
+
+
+`0.9.6`_ (2016-08-13)
+---------------------
+
+* Added Python 3 as a dependency for Homebrew installations
+  to ensure some of the newer HTTP features work out of the box
+  for macOS users (starting with HTTPie 0.9.4.).
+* Added the ability to unset a request header with ``Header:``, and send an
+  empty value with ``Header;``.
+* Added ``--default-scheme <URL_SCHEME>`` to enable things like
+  ``$ alias https='http --default-scheme=https``.
+* Added ``-I`` as a shortcut for ``--ignore-stdin``.
+* Added fish shell completion (located in ``extras/httpie-completion.fish``
+  in the Github repo).
+* Updated ``requests`` to 2.10.0 so that SOCKS support can be added via
+  ``pip install requests[socks]``.
+* Changed the default JSON ``Accept`` header from ``application/json``
+  to ``application/json, */*``.
+* Changed the pre-processing of request HTTP headers so that any leading
+  and trailing whitespace is removed.
+
+
+`0.9.4`_ (2016-07-01)
+---------------------
+
 * Added ``Content-Type`` of files uploaded in ``multipart/form-data`` requests
 * Added ``--ssl=<PROTOCOL>`` to specify the desired SSL/TLS protocol version
   to use for HTTPS requests.
 * Added JSON detection with ``--json, -j`` to work around incorrect
   ``Content-Type``
 * Added ``--all`` to show intermediate responses such as redirects (with ``--follow``)
-* Added ``--print-others, -P WHAT`` to specify formatting of intermediate responses
+* Added ``--history-print, -P WHAT`` to specify formatting of intermediate responses
 * Added ``--max-redirects=N`` (default 30)
 * Added ``-A`` as short name for ``--auth-type``
 * Added ``-F`` as short name for ``--follow``
@@ -28,8 +58,8 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 * Improved ``--debug`` output
 * Fixed ``--session`` when used with ``--download``
 * Fixed ``--download`` to trim too long filenames before saving the file
-* Fixed handling of ``Content-Type`` with multiple ``+subtype`` parts
-* Removed XML formatting as the implementation suffered from multiple issues
+* Fixed the handling of ``Content-Type`` with multiple ``+subtype`` parts
+* Removed the XML formatter as the implementation suffered from multiple issues
 
 
 
@@ -284,4 +314,6 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 .. _0.9.1: https://github.com/jkbrzt/httpie/compare/0.9.0...0.9.1
 .. _0.9.2: https://github.com/jkbrzt/httpie/compare/0.9.1...0.9.2
 .. _0.9.3: https://github.com/jkbrzt/httpie/compare/0.9.2...0.9.3
-.. _1.0.0-dev: https://github.com/jkbrzt/httpie/compare/0.9.3...master
+.. _0.9.4: https://github.com/jkbrzt/httpie/compare/0.9.3...0.9.4
+.. _0.9.6: https://github.com/jkbrzt/httpie/compare/0.9.4...0.9.6
+.. _1.0.0-dev: https://github.com/jkbrzt/httpie/compare/0.9.6...master

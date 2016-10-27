@@ -89,6 +89,7 @@ positional.add_argument(
     metavar='URL',
     help="""
     The scheme defaults to 'http://' if the URL does not include one.
+    (You can override this with: --default-scheme=https)
 
     You can also use a shorthand for localhost
 
@@ -101,6 +102,7 @@ positional.add_argument(
     'items',
     metavar='REQUEST_ITEM',
     nargs=ZERO_OR_MORE,
+    default=None,
     type=KeyValueArgType(*SEP_GROUP_ALL_ITEMS),
     help=r"""
     Optional key-value pairs to be included in the request. The separator used
@@ -212,7 +214,7 @@ output_processing.add_argument(
     """.format(
         default=DEFAULT_STYLE,
         available='\n'.join(
-            '{0}{1}'.format(8*' ', line.strip())
+            '{0}{1}'.format(8 * ' ', line.strip())
             for line in wrap(', '.join(sorted(AVAILABLE_STYLES)), 60)
         ).rstrip(),
     )
@@ -298,8 +300,8 @@ output_options.add_argument(
     """
 )
 output_options.add_argument(
-    '--print-others', '-P',
-    dest='output_options_others',
+    '--history-print', '-P',
+    dest='output_options_history',
     metavar='WHAT',
     help="""
     The same as --print, -p but applies only to intermediary requests/responses
@@ -576,7 +578,7 @@ ssl.add_argument(
 troubleshooting = parser.add_argument_group(title='Troubleshooting')
 
 troubleshooting.add_argument(
-    '--ignore-stdin',
+    '--ignore-stdin', '-I',
     action='store_true',
     default=False,
     help="""
@@ -608,6 +610,14 @@ troubleshooting.add_argument(
     default=False,
     help="""
     Prints the exception traceback should one occur.
+
+    """
+)
+troubleshooting.add_argument(
+    '--default-scheme',
+    default="http",
+    help="""
+    The default scheme to use if not specified in the URL.
 
     """
 )
